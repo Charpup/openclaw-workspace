@@ -131,9 +131,11 @@ def main():
         except Exception:
             receipt = {'post_id': post.get('post_id'), 'error': 'receipt_fetch_failed'}
 
+    verified = (post.get('verification_status') == 'verified')
+
     print(json.dumps({
         'ok': True,
-        'published': True,
+        'published': verified,
         'gate': gate,
         'draft_file': str(draft),
         'post': post,

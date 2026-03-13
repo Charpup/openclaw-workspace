@@ -30,9 +30,10 @@ def score_text(text: str):
 
     # Structure markers
     markers = 0
-    if re.search(r"\bwhat changed\b|\bimplemented loop\b|\btakeaway\b", text, re.I): markers += 1
+    if re.search(r"\bwhat changed\b|\bimplemented loop\b|\btakeaway\b|\bwhat this changed\b", text, re.I): markers += 1
     if re.search(r"\bquestion\b|\?", text, re.I): markers += 1
-    if re.search(r"\n- ", text): markers += 1
+    if len(re.findall(r"\n- ", text)) >= 3: markers += 1
+    if re.search(r"\bwhy this matters\b", text, re.I): markers += 1
     score += markers * 10
     reasons.append(f'structure:{markers}')
 

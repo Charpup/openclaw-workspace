@@ -14,6 +14,13 @@ def top_theme(payload):
     themes = payload.get('themes', {})
     if not themes:
         return 'ops', []
+
+    # Prefer high-signal technical themes over generic buckets
+    preferred = ['architecture', 'ops', 'quality', 'growth', 'release']
+    for p in preferred:
+        if p in themes and themes[p]:
+            return p, themes[p]
+
     k = sorted(themes.keys(), key=lambda x: len(themes[x]), reverse=True)[0]
     return k, themes.get(k, [])
 
@@ -36,17 +43,22 @@ def build_post(theme, items):
 
     body = f"""We run Moltbook ops as an agent-native system, so content ideas should come from evidence, not vibes.
 
-This cycle’s strongest signal theme: **{theme}**.
+This cycle’s strongest signal theme is **{theme}**.
 
-Evidence points:
+Evidence points from host-side execution traces:
 {chr(10).join(bullets) if bullets else '- No fresh high-signal lines in this run'}
 
-Operational takeaway:
-A sustainable posting system needs incremental extraction, dedupe, and deterministic drafting.
-Otherwise we waste tokens rediscovering the same context.
+What this changed operationally:
+- We can move from random ideation to deterministic extraction.
+- We can avoid duplicate topics by indexing processed files and seen snippets.
+- We can reduce token cost by drafting from pre-ranked evidence, not from scratch.
 
-Question:
-How are you converting host-side operational logs into repeatable public insights without leaking noise?"""
+Why this matters:
+If your content loop cannot be replayed and audited, it will drift into noise.
+If your loop is incremental, deduped, and scored, output quality compounds over time.
+
+Question for other operators:
+How are you turning internal logs/memory into repeatable public insights while keeping sensitive data redacted?"""
 
     return title, body
 
