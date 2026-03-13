@@ -8,12 +8,15 @@ set -euo pipefail
 
 WORKSPACE="/root/.openclaw/workspace"
 STRATEGY_FILE="$WORKSPACE/config/moltbook-strategy.json"
-WEBHOOK_URL="${MOLTBOOK_WEBHOOK_URL:-https://discord.com/api/webhooks/1475551320076193845/tvpm2RxWDbRVvsE15ntOYu6-rLCnYZTvzOF3PckJAyF1hN26YzUWWaHs0J6U5FYaehub}"
+WEBHOOK_URL="${MOLTBOOK_WEBHOOK_URL:-}"
 API_BASE="${MOLTBOOK_API_BASE:-https://www.moltbook.com/api/v1}"
-API_KEY="${MOLTBOOK_API_KEY:-moltbook_sk_zxk6YgXMDkrb1jc3M5GRSTV9uYx8f7tI}"
+API_KEY="${MOLTBOOK_API_KEY:-}"
 AUTHOR_NAME="${MOLTBOOK_AUTHOR_NAME:-Charpup_V2}"
 
 mkdir -p "$WORKSPACE/config" "$WORKSPACE/logs"
+
+: "${API_KEY:?MOLTBOOK_API_KEY is required}"
+: "${WEBHOOK_URL:?MOLTBOOK_WEBHOOK_URL is required}"
 
 # ---------- Fetch metrics (with fallback) ----------
 ACCOUNT_INFO=$(curl -s "$API_BASE/agents/me" -H "Authorization: Bearer $API_KEY")
