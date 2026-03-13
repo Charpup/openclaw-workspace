@@ -119,6 +119,12 @@ def solve(challenge: str):
         m_force_base = re.search(r'is\W+(.+?)\W+n\w*to\w*s', sl)
         m_force_times = re.search(r'exerts\W+force\W+(.+?)\W+times', sl)
 
+        # C1.5) multiplication: "... X newtons ... has Y claws ... total force"
+        m_force_of = re.search(r'force\W+of\W+(.+?)\W+n\w*to\w*s', sl)
+        m_has_claws = re.search(r'has\W+(.+?)\W+claws?', sl)
+        m_newtons_any = re.search(r'(.+?)\W+n\w*to\w*s', sl)
+        has_total_force = bool(re.search(r'total\W*fo\W*r\W*c\W*e|total\W*force', sl))
+
         # C2) additive total force: two claw forces in newtons
         force_vals = []
         for seg in re.findall(r'exerts\W+(.+?)\W+n\w*to\w*s', sl):
@@ -132,11 +138,19 @@ def solve(challenge: str):
             except Exception:
                 pass
 
-        if m_force_base and m_force_times and ('total force' in sl or 'times' in sl):
+        if m_force_base and m_force_times and (has_total_force or 'times' in sl):
             a = phrase_to_num(m_force_base.group(1))
             b = phrase_to_num(m_force_times.group(1))
             op = '*'
-        elif ('total force' in sl or 'another claw' in sl) and len(force_vals) >= 2:
+        elif m_force_of and m_has_claws and has_total_force:
+            a = phrase_to_num(m_force_of.group(1))
+            b = phrase_to_num(m_has_claws.group(1))
+            op = '*'
+        elif m_newtons_any and m_has_claws and has_total_force:
+            a = phrase_to_num(m_newtons_any.group(1))
+            b = phrase_to_num(m_has_claws.group(1))
+            op = '*'
+        elif (has_total_force or 'another claw' in sl) and len(force_vals) >= 2:
             a, b = force_vals[0], force_vals[1]
             op = '+'
         elif m_at and m_by and op in ['+', '-']:
