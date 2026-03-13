@@ -43,6 +43,21 @@ def reachable(url: str):
         return False, None
 
 
+def fetch_post_receipt(api_key: str, post_id: str):
+    api = 'https://www.moltbook.com/api/v1'
+    h = {'Authorization': f'Bearer {api_key}'}
+    r = requests.get(f'{api}/posts/{post_id}', headers=h, timeout=20)
+    p = r.json().get('post', {})
+    return {
+        'post_id': post_id,
+        'title': p.get('title'),
+        'verification_status': p.get('verification_status'),
+        'is_spam': p.get('is_spam'),
+        'created_at': p.get('created_at'),
+        'author': (p.get('author') or {}).get('name'),
+    }
+
+
 def load_api_key():
     env = Path('/root/.openclaw/skills/moltbook-automation/.env')
     if env.exists():
@@ -90,8 +105,8 @@ def main():
 
     url = post.get('post_url')
     ok, code = reachable(url) if url else (False, None)
-    post['url_reachable'] = ok
-    post['url_status'] = code
+    post['url_reachable_from_runner'] = ok
+    post['url_status_from_runner'] = code
 
     # fallback URL hints
     if not ok and post.get('post_id'):
@@ -105,9 +120,16 @@ def main():
             o, sc = reachable(c)
             if o:
                 post['post_url'] = c
-                post['url_reachable'] = True
-                post['url_status'] = sc
+                post['url_reachable_from_runner'] = True
+                post['url_status_from_runner'] = sc
                 break
+
+    receipt = None
+    if post.get('post_id'):
+        try:
+            receipt = fetch_post_receipt(api_key, post['post_id'])
+        except Exception:
+            receipt = {'post_id': post.get('post_id'), 'error': 'receipt_fetch_failed'}
 
     print(json.dumps({
         'ok': True,
@@ -115,6 +137,8 @@ def main():
         'gate': gate,
         'draft_file': str(draft),
         'post': post,
+        'acceptance_receipt': receipt,
+        'note': 'URL may be geo-blocked for human regions; use acceptance_receipt as canonical proof.',
     }, ensure_ascii=False))
 
 
