@@ -1,0 +1,14 @@
+# Additional ignore patterns for idea harvester
+# One glob per line
+
+**/secrets/**
+**/*credentials*.json
+**/*.pem
+**/*.key
+**/*.sqlite
+**/*.db
+**/media/**
+**/inbound/**
+**/outbound/**
+**/tmp/**
+**/.learnings/**
